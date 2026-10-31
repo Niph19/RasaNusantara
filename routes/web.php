@@ -22,7 +22,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/dashboard', DashboardController::class)
-    ->middleware(['auth', 'verified', 'can:manage-catering'])
+    ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
 Route::middleware(['auth', 'verified', 'can:manage-catering'])
