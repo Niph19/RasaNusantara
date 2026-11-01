@@ -23,7 +23,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory(10)->create();
+        User::factory()->admin()->create([
+            'name' => 'Admin Rasa Nusantara',
+            'email' => 'admin@rasanusantara.test',
+        ]);
+
+        User::factory(9)->customer()->create();
 
         $cities = City::factory(50)->create();
 

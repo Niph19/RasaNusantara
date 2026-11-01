@@ -14,10 +14,15 @@ class MenuController extends Controller
     public function index(Request $request): View
     {
         $filters = $request->validate([
-            'search' => ['nullable', 'string', 'max:100'],
+            'search'      => ['nullable', 'string', 'max:100'],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
+            'sort'        => ['nullable', 'string', 'in:id,name,price'],
+            'direction'   => ['nullable', 'string', 'in:asc,desc'],
         ]);
-        $search = trim($filters['search'] ?? '');
+        $search    = trim($filters['search'] ?? '');
+        $sort      = $filters['sort'] ?? 'name';
+        $direction = $filters['direction'] ?? 'asc';
+
         $records = Menu::query()
             ->with('category')
             ->withCount('orderItems')
@@ -26,20 +31,23 @@ class MenuController extends Controller
                 $query->where('name', 'like', "%{$search}%")
                     ->orWhereHas('category', fn ($categoryQuery) => $categoryQuery->where('name', 'like', "%{$search}%"));
             })
-            ->orderBy('name')
+            ->orderBy($sort, $direction)
             ->paginate(15)
             ->withQueryString();
 
         return view('admin.resources.index', [
-            'title' => 'Menu',
-            'routeName' => 'admin.menus',
-            'records' => $records,
-            'columns' => [
-                'name' => 'Nama menu',
-                'category.name' => 'Kategori',
-                'price' => 'Harga',
+            'title'           => 'Menu',
+            'routeName'       => 'admin.menus',
+            'records'         => $records,
+            'columns'         => [
+                'name'              => 'Nama menu',
+                'category.name'     => 'Kategori',
+                'price'             => 'Harga',
                 'order_items_count' => 'Jumlah item terjual',
             ],
+            'sortableColumns' => ['name' => 'Nama menu', 'price' => 'Harga'],
+            'sort'            => $sort,
+            'direction'       => $direction,
             'categoryOptions' => Category::query()->orderBy('name')->pluck('name', 'id'),
         ]);
     }

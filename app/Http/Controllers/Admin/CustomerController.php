@@ -13,7 +13,15 @@ class CustomerController extends Controller
 {
     public function index(Request $request): View
     {
-        $search = trim($request->validate(['search' => ['nullable', 'string', 'max:100']])['search'] ?? '');
+        $validated = $request->validate([
+            'search'    => ['nullable', 'string', 'max:100'],
+            'sort'      => ['nullable', 'string', 'in:id,name'],
+            'direction' => ['nullable', 'string', 'in:asc,desc'],
+        ]);
+        $search    = trim($validated['search'] ?? '');
+        $sort      = $validated['sort'] ?? 'name';
+        $direction = $validated['direction'] ?? 'asc';
+
         $records = Customer::query()
             ->with('city')
             ->withCount('orders')
@@ -22,20 +30,23 @@ class CustomerController extends Controller
                     ->orWhere('phone', 'like', "%{$search}%")
                     ->orWhereHas('city', fn ($cityQuery) => $cityQuery->where('name', 'like', "%{$search}%"));
             })
-            ->orderBy('name')
+            ->orderBy($sort, $direction)
             ->paginate(15)
             ->withQueryString();
 
         return view('admin.resources.index', [
-            'title' => 'Pelanggan',
-            'routeName' => 'admin.customers',
-            'records' => $records,
-            'columns' => [
-                'name' => 'Nama pelanggan',
-                'phone' => 'Telepon',
-                'city.name' => 'Kota',
+            'title'           => 'Pelanggan',
+            'routeName'       => 'admin.customers',
+            'records'         => $records,
+            'columns'         => [
+                'name'         => 'Nama pelanggan',
+                'phone'        => 'Telepon',
+                'city.name'    => 'Kota',
                 'orders_count' => 'Jumlah pesanan',
             ],
+            'sortableColumns' => ['name' => 'Nama pelanggan'],
+            'sort'            => $sort,
+            'direction'       => $direction,
         ]);
     }
 

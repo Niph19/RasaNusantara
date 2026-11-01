@@ -12,19 +12,30 @@ class PaymentMethodController extends Controller
 {
     public function index(Request $request): View
     {
-        $search = $request->validate(['search' => ['nullable', 'string', 'max:100']])['search'] ?? '';
+        $validated = $request->validate([
+            'search'    => ['nullable', 'string', 'max:100'],
+            'sort'      => ['nullable', 'string', 'in:id,name'],
+            'direction' => ['nullable', 'string', 'in:asc,desc'],
+        ]);
+        $search    = trim($validated['search'] ?? '');
+        $sort      = $validated['sort'] ?? 'name';
+        $direction = $validated['direction'] ?? 'asc';
+
         $records = PaymentMethod::query()
             ->withCount('orders')
-            ->where('name', 'like', '%'.trim($search).'%')
-            ->orderBy('name')
+            ->where('name', 'like', '%'.$search.'%')
+            ->orderBy($sort, $direction)
             ->paginate(15)
             ->withQueryString();
 
         return view('admin.resources.index', [
-            'title' => 'Metode pembayaran',
-            'routeName' => 'admin.payment-methods',
-            'records' => $records,
-            'columns' => ['name' => 'Nama metode', 'orders_count' => 'Jumlah pesanan'],
+            'title'           => 'Metode pembayaran',
+            'routeName'       => 'admin.payment-methods',
+            'records'         => $records,
+            'columns'         => ['name' => 'Nama metode', 'orders_count' => 'Jumlah pesanan'],
+            'sortableColumns' => ['name' => 'Nama metode'],
+            'sort'            => $sort,
+            'direction'       => $direction,
         ]);
     }
 

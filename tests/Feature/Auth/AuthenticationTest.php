@@ -21,6 +21,17 @@ test('users can authenticate using the login screen', function () {
     $this->get(route('profile.edit'))->assertOk();
 });
 
+test('customer login ignores a stored intended admin URL and redirects to profile', function () {
+    $user = User::factory()->create(['role' => 'customer']);
+
+    $this->withSession(['url.intended' => route('dashboard')])
+        ->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])
+        ->assertRedirect(route('profile.edit'));
+});
+
 test('admins can authenticate and are redirected to the dashboard', function () {
     $user = User::factory()->admin()->create();
 

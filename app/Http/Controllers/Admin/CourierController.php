@@ -12,22 +12,33 @@ class CourierController extends Controller
 {
     public function index(Request $request): View
     {
-        $search = $request->validate(['search' => ['nullable', 'string', 'max:100']])['search'] ?? '';
+        $validated = $request->validate([
+            'search'    => ['nullable', 'string', 'max:100'],
+            'sort'      => ['nullable', 'string', 'in:id,name'],
+            'direction' => ['nullable', 'string', 'in:asc,desc'],
+        ]);
+        $search    = trim($validated['search'] ?? '');
+        $sort      = $validated['sort'] ?? 'name';
+        $direction = $validated['direction'] ?? 'asc';
+
         $records = Courier::query()
             ->withCount('orders')
             ->where(function ($query) use ($search) {
-                $query->where('name', 'like', '%'.trim($search).'%')
-                    ->orWhere('phone', 'like', '%'.trim($search).'%');
+                $query->where('name', 'like', '%'.$search.'%')
+                    ->orWhere('phone', 'like', '%'.$search.'%');
             })
-            ->orderBy('name')
+            ->orderBy($sort, $direction)
             ->paginate(15)
             ->withQueryString();
 
         return view('admin.resources.index', [
-            'title' => 'Kurir',
-            'routeName' => 'admin.couriers',
-            'records' => $records,
-            'columns' => ['name' => 'Nama kurir', 'phone' => 'Telepon', 'orders_count' => 'Jumlah pesanan'],
+            'title'           => 'Kurir',
+            'routeName'       => 'admin.couriers',
+            'records'         => $records,
+            'columns'         => ['name' => 'Nama kurir', 'phone' => 'Telepon', 'orders_count' => 'Jumlah pesanan'],
+            'sortableColumns' => ['name' => 'Nama kurir'],
+            'sort'            => $sort,
+            'direction'       => $direction,
         ]);
     }
 

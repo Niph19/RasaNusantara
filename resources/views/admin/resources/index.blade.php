@@ -195,7 +195,33 @@
                             <thead>
                                 <tr>
                                     @foreach ($columns as $column => $label)
-                                        <th scope="col">{{ $label }}</th>
+                                        <th scope="col">
+                                            @if (isset($sortableColumns[$column]))
+                                                @php
+                                                    $isActive  = isset($sort) && $sort === $column;
+                                                    $nextDir   = ($isActive && isset($direction) && $direction === 'asc') ? 'desc' : 'asc';
+                                                @endphp
+                                                <a href="{{ route($routeName.'.index', array_merge(request()->except(['sort','direction','page']), ['sort' => $column, 'direction' => $nextDir])) }}"
+                                                   class="inline-flex items-center gap-1 hover:text-emas-500 transition-colors {{ $isActive ? 'text-emas-500 font-semibold' : '' }}">
+                                                    {{ $label }}
+                                                    @if ($isActive)
+                                                        <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                                                            @if (isset($direction) && $direction === 'asc')
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>
+                                                            @else
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                                            @endif
+                                                        </svg>
+                                                    @else
+                                                        <svg class="w-3 h-3 shrink-0 text-legam-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
+                                                        </svg>
+                                                    @endif
+                                                </a>
+                                            @else
+                                                {{ $label }}
+                                            @endif
+                                        </th>
                                     @endforeach
                                     <th scope="col">Aksi</th>
                                 </tr>

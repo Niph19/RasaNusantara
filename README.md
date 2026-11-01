@@ -46,6 +46,15 @@ Nested Eager Loading.
    php artisan serve
    ```
 
+   Akun admin bawaan seeder:
+
+   ```text
+   Email: admin@rasanusantara.test
+   Password: password
+   ```
+
+   Seeder membuat satu pengguna admin dan sembilan pengguna customer. Password seluruh akun dummy yang dibuat factory adalah `password`.
+
    Halaman dashboard tersedia di `/dashboard`, sedangkan pengelolaan data tersedia di `/admin`. Keduanya hanya dapat diakses pengguna dengan email terverifikasi dan peran `admin`.
 
 ### Menyiapkan akses admin
@@ -91,18 +100,17 @@ Controller mengambil semua relasi yang digunakan view sebelum render:
 
 ```php
 Order::query()
-    ->join('payment_methods', 'orders.payment_method_id', '=', 'payment_methods.id')
-    ->select('orders.*', 'payment_methods.name as payment_method_name')
     ->with([
         'customer.city',
         'courier',
+        'paymentMethod',
         'orderItems.menu.category',
     ])
     ->orderByDesc('orders.id')
     ->paginate(15);
 ```
 
-Relasi bertingkat pelanggan/kota dan item/menu/kategori dimuat dengan nested eager loading; metode pembayaran digabungkan ke query pesanan melalui `JOIN`. Ini menghindari satu query relasi tambahan sehingga request terautentikasi tetap di bawah 10 query tanpa mengganti `paginate(15)`. Nilai metode pembayaran tetap ditampilkan pada tabel.
+Relasi bertingkat pelanggan/kota dan item/menu/kategori dimuat dengan nested eager loading, sementara kurir dan metode pembayaran dimuat sebagai relasi langsung. Query utama memisahkan pesanan beserta masing-masing relasi yang dimuat, lalu Laravel menggabungkannya ke model tanpa lazy loading. Dengan driver session/cache lokal yang tidak memakai database, halaman dashboard berada di bawah batas PRD kurang dari 10 query aplikasi.
 
 Lazy loading dicegah di luar production melalui `Model::preventLazyLoading(! app()->isProduction())`. Saat mengakses relasi yang belum dimuat dalam lingkungan lokal atau testing, Laravel melempar `LazyLoadingViolationException`.
 
@@ -132,10 +140,8 @@ Login, lalu buka `/dashboard` dan periksa panel Queries (hasil request yang dire
 
 ### Lazy loading
 
-Lazy loading dicegah di lingkungan lokal; demonstrasi baseline karena itu berakhir sebagai error guard, bukan menjalankan ratusan query. Screenshot berikut menunjukkan exception `LazyLoadingViolationException` saat relasi yang belum dimuat diakses.
-
-![Debugbar menampilkan error lazy loading yang dicegah](docs/screenshots/debugbar-lazy-loading.png)
+Lazy loading dicegah di lingkungan lokal; demonstrasi baseline berakhir sebagai guard `LazyLoadingViolationException`, bukan menjalankan ratusan query.
 
 ### Nested eager loading
 
-![Debugbar menunjukkan dashboard dengan 9 query](docs/screenshots/debugbar-eager-loading.png)
+![Tampilan dashboard dengan nested eager loading](docs/screenshots/dashboard-desktop.png)

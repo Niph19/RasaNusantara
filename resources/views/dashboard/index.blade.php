@@ -34,7 +34,7 @@
             <section aria-labelledby="orders-heading" class="card-nusantara">
 
                 {{-- Header tabel bergaya Batik Legam --}}
-                <div class="batik-header-bg px-5 py-4 flex items-center justify-between"
+                <div class="batik-header-bg px-5 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
                      style="border-bottom: 1px solid rgba(240,180,41,0.20);">
                     <div class="flex items-center gap-2">
                         <span class="block w-1 h-5 rounded-full" style="background: linear-gradient(to bottom, #f0b429, #a87000);"></span>
@@ -42,9 +42,17 @@
                             Tabel Pesanan
                         </h2>
                     </div>
-                    <span class="text-xs text-legam-400">
-                        Halaman {{ $orders->currentPage() }} / {{ $orders->lastPage() }}
-                    </span>
+                    <div class="flex items-center gap-3">
+                        @if(request('sort'))
+                            <a href="{{ route('dashboard') }}"
+                               class="text-xs text-legam-500 hover:text-emas-500 transition-colors">
+                                Reset Filter
+                            </a>
+                        @endif
+                        <span class="text-xs text-legam-400">
+                            Halaman {{ $orders->currentPage() }} / {{ $orders->lastPage() }}
+                        </span>
+                    </div>
                 </div>
 
                 @if ($orders->isEmpty())
@@ -65,22 +73,101 @@
                             <thead>
                                 <tr>
                                     <th scope="col" class="whitespace-nowrap w-24">
-                                        ID Order
+                                        <a href="{{ route('dashboard', ['sort' => 'id', 'direction' => (request('sort') === 'id' && request('direction') === 'asc') ? 'desc' : 'asc']) }}"
+                                           class="flex items-center gap-1 hover:text-emas-500 transition-colors">
+                                            ID Order
+                                            @if(request('sort') === 'id')
+                                                <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    @if(request('direction') === 'asc')
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>
+                                                    @else
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                                    @endif
+                                                </svg>
+                                            @endif
+                                        </a>
                                     </th>
                                     <th scope="col" class="min-w-52">
-                                        Pelanggan
+                                        <a href="{{ route('dashboard', ['sort' => 'customer', 'direction' => (request('sort') === 'customer' && request('direction') === 'asc') ? 'desc' : 'asc']) }}"
+                                           class="flex items-center gap-1 hover:text-emas-500 transition-colors">
+                                            Pelanggan
+                                            @if(request('sort') === 'customer')
+                                                <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    @if(request('direction') === 'asc')
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>
+                                                    @else
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                                    @endif
+                                                </svg>
+                                            @endif
+                                        </a>
                                     </th>
                                     <th scope="col" class="min-w-80">
                                         Pesanan
                                     </th>
                                     <th scope="col" class="min-w-48">
-                                        Status
+                                        <a href="{{ route('dashboard', ['sort' => 'status', 'direction' => (request('sort') === 'status' && request('direction') === 'asc') ? 'desc' : 'asc']) }}"
+                                           class="flex items-center gap-1 hover:text-emas-500 transition-colors">
+                                            Status
+                                            @if(request('sort') === 'status')
+                                                <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    @if(request('direction') === 'asc')
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>
+                                                    @else
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                                    @endif
+                                                </svg>
+                                            @endif
+                                        </a>
                                     </th>
                                     <th scope="col" class="min-w-52">
-                                        Pengiriman &amp; Pembayaran
+                                        <button type="button"
+                                                onclick="toggleDeliverySort(event)"
+                                                class="flex items-center gap-1 hover:text-emas-500 transition-colors w-full">
+                                            Pengiriman &amp; Pembayaran
+                                            @if(in_array(request('sort'), ['courier', 'payment_method']))
+                                                <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    @if(request('direction') === 'asc')
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/>
+                                                    @else
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                                                    @endif
+                                                </svg>
+                                            @endif
+                                        </button>
+                                        <div id="deliverySortMenu" class="hidden absolute right-0 mt-1 w-48 rounded-md shadow-lg z-10" style="background: #fffcf7; border: 1px solid #e8d9c4;">
+                                            <div class="py-1">
+                                                <a href="{{ route('dashboard', ['sort' => 'courier', 'direction' => 'asc']) }}"
+                                                   class="block px-4 py-2 text-sm text-legam-700 hover:bg-legam-50 @if(request('sort') === 'courier') font-semibold @endif">
+                                                    Kurir (A-Z)
+                                                </a>
+                                                <a href="{{ route('dashboard', ['sort' => 'courier', 'direction' => 'desc']) }}"
+                                                   class="block px-4 py-2 text-sm text-legam-700 hover:bg-legam-50 @if(request('sort') === 'courier' && request('direction') === 'desc') font-semibold @endif">
+                                                    Kurir (Z-A)
+                                                </a>
+                                                <a href="{{ route('dashboard', ['sort' => 'payment_method', 'direction' => 'asc']) }}"
+                                                   class="block px-4 py-2 text-sm text-legam-700 hover:bg-legam-50 @if(request('sort') === 'payment_method') font-semibold @endif">
+                                                    Pembayaran (A-Z)
+                                                </a>
+                                                <a href="{{ route('dashboard', ['sort' => 'payment_method', 'direction' => 'desc']) }}"
+                                                   class="block px-4 py-2 text-sm text-legam-700 hover:bg-legam-50 @if(request('sort') === 'payment_method' && request('direction') === 'desc') font-semibold @endif">
+                                                    Pembayaran (Z-A)
+                                                </a>
+                                            </div>
+                                        </div>
                                     </th>
                                 </tr>
                             </thead>
+                            <script>
+                                function toggleDeliverySort(event) {
+                                    event.stopPropagation();
+                                    const menu = document.getElementById('deliverySortMenu');
+                                    menu.classList.toggle('hidden');
+                                }
+                                document.addEventListener('click', function() {
+                                    document.getElementById('deliverySortMenu').classList.add('hidden');
+                                });
+                            </script>
                             <tbody class="divide-y bg-white" style="divide-color: #e8d9c4;">
                                 @foreach ($orders as $order)
                                     <tr class="align-top hover:bg-legam-50 transition-colors duration-100">
@@ -135,7 +222,7 @@
                                         {{-- Pengiriman & Pembayaran --}}
                                         <td class="px-4 py-4">
                                             <p class="text-sm font-medium text-legam-900">{{ $order->courier->name }}</p>
-                                            <p class="mt-0.5 text-xs text-legam-500">{{ $order->payment_method_name }}</p>
+                                            <p class="mt-0.5 text-xs text-legam-500">{{ $order->paymentMethod->name }}</p>
                                         </td>
 
                                     </tr>

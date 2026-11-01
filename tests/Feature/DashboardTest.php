@@ -113,7 +113,9 @@ it('seeds the domain data in the required quantities', function () {
         ->and(Menu::count())->toBe(150)
         ->and(Customer::count())->toBe(200)
         ->and(Order::count())->toBe(150)
-        ->and(OrderItem::count())->toBeBetween(450, 750);
+        ->and(OrderItem::count())->toBeBetween(450, 750)
+        ->and(User::where('role', 'admin')->count())->toBeGreaterThanOrEqual(1)
+        ->and(User::where('email', 'admin@rasanusantara.test')->value('role'))->toBe('admin');
 
     $invalidSubtotals = DB::table('order_items')
         ->join('menus', 'menus.id', '=', 'order_items.menu_id')

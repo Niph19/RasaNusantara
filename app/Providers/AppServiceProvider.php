@@ -22,8 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Model::preventLazyLoading(! app()->isProduction());
-
         Gate::define('manage-catering', fn (User $user): bool => $user->isAdmin());
+        Model::preventLazyLoading(! app()->isProduction());
     }
 }

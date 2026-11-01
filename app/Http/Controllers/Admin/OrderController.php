@@ -17,7 +17,15 @@ class OrderController extends Controller
 
     public function index(Request $request): View
     {
-        $search = trim($request->validate(['search' => ['nullable', 'string', 'max:100']])['search'] ?? '');
+        $validated = $request->validate([
+            'search'    => ['nullable', 'string', 'max:100'],
+            'sort'      => ['nullable', 'string', 'in:id,status'],
+            'direction' => ['nullable', 'string', 'in:asc,desc'],
+        ]);
+        $search    = trim($validated['search'] ?? '');
+        $sort      = $validated['sort'] ?? 'id';
+        $direction = $validated['direction'] ?? 'desc';
+
         $records = Order::query()
             ->with(['customer', 'paymentMethod', 'courier'])
             ->withCount('orderItems')
@@ -31,22 +39,25 @@ class OrderController extends Controller
                     ->orWhereHas('paymentMethod', fn ($paymentQuery) => $paymentQuery->where('name', 'like', "%{$search}%"))
                     ->orWhereHas('courier', fn ($courierQuery) => $courierQuery->where('name', 'like', "%{$search}%"));
             })
-            ->orderByDesc('id')
+            ->orderBy($sort, $direction)
             ->paginate(15)
             ->withQueryString();
 
         return view('admin.resources.index', [
-            'title' => 'Pesanan',
-            'routeName' => 'admin.orders',
-            'records' => $records,
-            'columns' => [
-                'id' => 'ID order',
-                'customer.name' => 'Pelanggan',
-                'courier.name' => 'Kurir',
+            'title'           => 'Pesanan',
+            'routeName'       => 'admin.orders',
+            'records'         => $records,
+            'columns'         => [
+                'id'                 => 'ID order',
+                'customer.name'      => 'Pelanggan',
+                'courier.name'       => 'Kurir',
                 'paymentMethod.name' => 'Metode pembayaran',
-                'status' => 'Status',
-                'order_items_count' => 'Jumlah item',
+                'status'             => 'Status',
+                'order_items_count'  => 'Jumlah item',
             ],
+            'sortableColumns' => ['id' => 'ID order', 'status' => 'Status'],
+            'sort'            => $sort,
+            'direction'       => $direction,
         ]);
     }
 

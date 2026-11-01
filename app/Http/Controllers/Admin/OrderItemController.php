@@ -16,10 +16,15 @@ class OrderItemController extends Controller
     public function index(Request $request): View
     {
         $filters = $request->validate([
-            'search' => ['nullable', 'string', 'max:100'],
+            'search'      => ['nullable', 'string', 'max:100'],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
+            'sort'        => ['nullable', 'string', 'in:id,qty,subtotal'],
+            'direction'   => ['nullable', 'string', 'in:asc,desc'],
         ]);
-        $search = trim($filters['search'] ?? '');
+        $search    = trim($filters['search'] ?? '');
+        $sort      = $filters['sort'] ?? 'id';
+        $direction = $filters['direction'] ?? 'desc';
+
         $records = OrderItem::query()
             ->with(['order', 'menu.category'])
             ->when($filters['category_id'] ?? null, fn ($query, $categoryId) => $query->whereHas(
@@ -36,22 +41,25 @@ class OrderItemController extends Controller
                 $query->orWhereHas('menu', fn ($menuQuery) => $menuQuery->where('name', 'like', "%{$search}%"))
                     ->orWhereHas('menu.category', fn ($categoryQuery) => $categoryQuery->where('name', 'like', "%{$search}%"));
             })
-            ->orderByDesc('id')
+            ->orderBy($sort, $direction)
             ->paginate(15)
             ->withQueryString();
 
         return view('admin.resources.index', [
-            'title' => 'Item pesanan',
-            'routeName' => 'admin.order-items',
-            'records' => $records,
-            'columns' => [
-                'id' => 'ID item',
-                'order.id' => 'ID order',
-                'menu.name' => 'Menu',
+            'title'           => 'Item pesanan',
+            'routeName'       => 'admin.order-items',
+            'records'         => $records,
+            'columns'         => [
+                'id'                 => 'ID item',
+                'order.id'           => 'ID order',
+                'menu.name'          => 'Menu',
                 'menu.category.name' => 'Kategori',
-                'qty' => 'Jumlah',
-                'subtotal' => 'Subtotal',
+                'qty'                => 'Jumlah',
+                'subtotal'           => 'Subtotal',
             ],
+            'sortableColumns' => ['id' => 'ID item', 'qty' => 'Jumlah', 'subtotal' => 'Subtotal'],
+            'sort'            => $sort,
+            'direction'       => $direction,
             'categoryOptions' => Category::query()->orderBy('name')->pluck('name', 'id'),
         ]);
     }
