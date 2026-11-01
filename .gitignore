@@ -12,7 +12,7 @@
 /.phpunit.cache
 /.vscode
 /.zed
-/.agents/
+/.agents/skills
 /.kiro/
 /auth.json
 /node_modules
@@ -23,6 +23,8 @@
 /storage/*.key
 /storage/pail
 /vendor
+AGENTS.md
+CLAUDE.md
 _ide_helper.php
 Homestead.json
 Homestead.yaml
