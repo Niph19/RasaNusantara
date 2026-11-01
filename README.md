@@ -7,6 +7,13 @@ Simulasi sistem katering dengan 7 tabel berelasi kompleks. Proyek ini
 mendemonstrasikan penyelesaian ekstrim dari N+1 Query Problem menggunakan
 Nested Eager Loading.
 
+## Bukti Optimasi
+
+Lazy Loading
+![alt text](image.png)
+
+Eager Loading
+![alt text](image-1.png)
 
 ## Teknologi
 

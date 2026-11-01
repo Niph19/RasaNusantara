@@ -12,6 +12,8 @@
 /.phpunit.cache
 /.vscode
 /.zed
+/.agents/
+/.kiro/
 /auth.json
 /node_modules
 /public/build

@@ -49,6 +49,14 @@
                                 Reset Filter
                             </a>
                         @endif
+                        <a href="{{ route('dashboard', array_merge(request()->except('page'), ['mode' => 'eager'])) }}"
+                           class="text-xs {{ $mode === 'eager' ? 'font-semibold text-emas-500' : 'text-legam-500 hover:text-emas-500' }}">
+                            Eager
+                        </a>
+                        <a href="{{ route('dashboard', array_merge(request()->except('page'), ['mode' => 'lazy'])) }}"
+                           class="text-xs {{ $mode === 'lazy' ? 'font-semibold text-red-500' : 'text-legam-500 hover:text-emas-500' }}">
+                            Lazy
+                        </a>
                         <span class="text-xs text-legam-400">
                             Halaman {{ $orders->currentPage() }} / {{ $orders->lastPage() }}
                         </span>
