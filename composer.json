@@ -16,7 +16,7 @@
     "require-dev": {
         "barryvdh/laravel-debugbar": "^4.4",
         "fakerphp/faker": "^1.23",
-        "laravel/boost": "^2.2",
+        "laravel/boost": "^2.10",
         "laravel/breeze": "^2.4",
         "laravel/pail": "^1.2.5",
         "laravel/pao": "^1.0.6",

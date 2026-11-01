@@ -1,6 +1,12 @@
-# Sistem Katering Nusantara
+# Sistem Katering Nusantara (Advanced Eager Loading)
+**Nama:** Hanif El Hakim | **Kelas:** XI-1 / XI-RPL
 
-Sistem admin Rasa Nusantara untuk mengelola data operasional katering. Dashboard pesanan menggunakan nested eager loading agar relasi bertingkat tidak menghasilkan N+1 query. Selain ruang lingkup dashboard di PRD awal, aplikasi kini menyediakan CRUD untuk seluruh delapan tabel domain sesuai kebutuhan pengembangan terbaru.
+
+
+Simulasi sistem katering dengan 7 tabel berelasi kompleks. Proyek ini
+mendemonstrasikan penyelesaian ekstrim dari N+1 Query Problem menggunakan
+Nested Eager Loading.
+
 
 ## Teknologi
 

@@ -164,6 +164,10 @@ Order::with([
 ])->paginate(15);
 ```
 
+### 6.4 Filter
+- Tambahkan filter pada CRUD dashboard admin (Ascending/Descending)
+- Tambah filter pada setiap kolom pada tabel data, namun hanya bisa diaktifkan 1 saja. Tidak bisa filter aktif lebih dari 1 pada kolom yang berbeda
+
 ---
 
 ## 7. Implementasi Teknis
